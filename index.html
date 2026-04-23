@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Benchmarking Generative Models for Weather Data Assimilation on Real Station Observations</title>
+<meta name="description" content="A unified benchmark for generative weather data assimilation on real, noisy MADIS station observations. Flow Guidance, D&#8209;Flow, FlowDPS, Diffusion&#8209;SDA, and 3D&#8209;Var under one protocol." />
+<meta property="og:title" content="Benchmarking Generative Models for Weather Data Assimilation on Real Station Observations" />
+<meta property="og:description" content="First unified benchmark for generative weather DA on real station observations. A learned prior — sampled from noise, with no ERA5 input — beats 3D&#8209;Var." />
+<meta property="og:image" content="assets/video_poster.jpg" />
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ScholarlyArticle",
+  "headline": "Benchmarking Generative Models for Weather Data Assimilation on Real Station Observations",
+  "author": [
+    {"@type": "Person", "name": "Ruizhe Huang", "affiliation": {"@type": "Organization", "name": "Massachusetts Institute of Technology"}, "sameAs": "https://scholar.google.com/citations?user=DD5WteQAAAAJ"},
+    {"@type": "Person", "name": "Qidong Yang", "affiliation": {"@type": "Organization", "name": "Massachusetts Institute of Technology"}, "sameAs": "https://scholar.google.com/citations?user=kOD_Z30AAAAJ"},
+    {"@type": "Person", "name": "Jonathan Giezendanner", "affiliation": {"@type": "Organization", "name": "Massachusetts Institute of Technology"}, "sameAs": "https://scholar.google.ch/citations?user=cNxEnK4AAAAJ"},
+    {"@type": "Person", "name": "Sherrie Wang", "affiliation": {"@type": "Organization", "name": "Massachusetts Institute of Technology"}, "sameAs": "https://scholar.google.com/citations?user=cf2KZTsAAAAJ"}
+  ],
+  "datePublished": "2025",
+  "publisher": {"@type": "Organization", "name": "Massachusetts Institute of Technology"},
+  "about": ["generative data assimilation", "flow matching", "diffusion models", "weather forecasting", "benchmark"],
+  "abstract": "First unified benchmark for generative weather data assimilation on real, noisy MADIS station observations. A learned prior sampled from pure Gaussian noise outperforms 3D-Var (35.7% vs. 33.3% RMSE reduction over ERA5) without ERA5 input at inference."
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231a1a1a'/%3E%3Ctext x='50' y='68' font-family='system-ui,sans-serif' font-size='60' font-weight='700' text-anchor='middle' fill='%23fff'%3EH%3C/text%3E%3C/svg%3E" />
+
+<!-- Font Awesome for icon-only dependence -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+<!-- Lite YouTube embed (facade — loads real iframe only on click) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.3/src/lite-yt-embed.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.3/src/lite-yt-embed.js"></script>
+
+<link rel="stylesheet" href="style.css" />
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<!-- =========================== HERO =========================== -->
+<section class="hero">
+  <div class="container">
+    <h1 class="title">
+      Benchmarking Generative Models for Weather Data Assimilation on Real Station Observations
+    </h1>
+
+    <p class="venue">MIT S.M. Thesis · 2025</p>
+
+    <p class="authors">
+      <a href="https://scholar.google.com/citations?user=DD5WteQAAAAJ&hl=en" target="_blank" rel="noopener">Ruizhe Huang</a><sup>1</sup>&nbsp;&nbsp;·&nbsp;&nbsp;
+      <a href="https://scholar.google.com/citations?user=kOD_Z30AAAAJ&hl=en" target="_blank" rel="noopener">Qidong Yang</a><sup>1</sup>&nbsp;&nbsp;·&nbsp;&nbsp;
+      <a href="https://scholar.google.ch/citations?user=cNxEnK4AAAAJ" target="_blank" rel="noopener">Jonathan Giezendanner</a><sup>1</sup>&nbsp;&nbsp;·&nbsp;&nbsp;
+      <a href="https://scholar.google.com/citations?user=cf2KZTsAAAAJ&hl=en" target="_blank" rel="noopener">Sherrie Wang</a><sup>1</sup>
+    </p>
+
+    <p class="affils">
+      <sup>1</sup>Massachusetts Institute of Technology
+    </p>
+
+    <div class="buttons">
+      <a class="pill disabled" href="#" aria-disabled="true" tabindex="-1">
+        <i class="fas fa-file-pdf"></i><span>Thesis (soon)</span>
+      </a>
+      <a class="pill disabled" href="#">
+        <i class="ai ai-arxiv"></i><i class="fas fa-file-lines"></i><span>arXiv (soon)</span>
+      </a>
+      <a class="pill disabled" href="#">
+        <i class="fab fa-github"></i><span>Code (soon)</span>
+      </a>
+      <a class="pill" href="#bibtex">
+        <i class="fas fa-quote-left"></i><span>BibTeX</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== TEASER VIDEO =========================== -->
+<section class="teaser">
+  <div class="container">
+    <div class="video-embed">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/jVlU9CnnOEU?rel=0"
+        title="Benchmarking Generative Models for Weather Data Assimilation — qualitative comparison"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+    </div>
+    <p class="caption">
+      Side-by-side assimilation outputs across six methods, for 10&thinsp;m wind ($u$, $v$), 2&thinsp;m temperature, and 2&thinsp;m dewpoint.
+      Flow Guidance and Diffusion&#8209;SDA sharpen local structure around stations without artifacts; D&#8209;Flow and stop&#8209;gradient collapse under sparsity; 3D&#8209;Var under&#8209;corrects far from stations.
+    </p>
+  </div>
+</section>
+
+<!-- =========================== ABSTRACT =========================== -->
+<section class="section">
+  <div class="container narrow">
+    <h2>Abstract</h2>
+    <p>
+      In weather forecasting, the WeatherBench benchmark catalyzed progress by providing a common evaluation protocol
+      that enabled fair comparison across deep learning architectures. No equivalent exists for
+      <em>generative data assimilation</em> (DA) &mdash; the task of integrating sparse, real&#8209;world observations into
+      atmospheric fields using learned priors. Existing generative approaches have been evaluated under disparate,
+      often idealized conditions (typically synthetic pseudo&#8209;observations sampled from the grid), making it hard to
+      compare design choices.
+    </p>
+    <p>
+      This thesis establishes the first unified benchmark for generative weather DA on real, noisy station observations.
+      We evaluate flow&#8209;matching methods (Flow Guidance, D&#8209;Flow, FlowDPS), diffusion (Diffusion&#8209;SDA), and classical
+      3D&#8209;Var, along with latent&#8209;space variants of Flow Guidance and 3D&#8209;Var, under a single experimental protocol:
+      <strong>11,849 ground weather stations</strong> from NCEP MADIS (Meteorological Assimilation Data Ingest System)
+      across CONUS (contiguous United States), ERA5 reanalysis fields for four surface variables (10&thinsp;m u- and v-wind,
+      2&thinsp;m temperature, 2&thinsp;m dewpoint), 360 evaluation snapshots in 2023, and consistent train/val/test station
+      splits with 1,778 held&#8209;out test stations.
+    </p>
+    <p>
+      The central finding is that <strong>guidance with a pretrained generative prior is an effective recipe for weather DA
+      on real observations</strong>. Starting from pure Gaussian noise and with no access to ERA5 at inference, Flow Guidance
+      outperforms 3D&#8209;Var (<strong>35.7&thinsp;% vs. 33.3&thinsp;%</strong> root-mean-square error (RMSE) reduction relative to ERA5) despite
+      3D&#8209;Var being given the ERA5 field twice, both as background regularizer and as initial condition. The learned
+      prior carries more information about atmospheric state structure than the combination of background covariance and
+      background field in classical DA.
+    </p>
+  </div>
+</section>
+
+<!-- =========================== KEY FINDINGS =========================== -->
+<section class="section alt">
+  <div class="container narrow">
+    <h2>Key Findings</h2>
+    <ol class="findings">
+      <li>
+        <h3>A learned prior beats the classical background.</h3>
+        <p>
+          Flow Guidance (35.7&thinsp;%) exceeds 3D&#8209;Var (33.3&thinsp;%) in RMSE reduction over ERA5,
+          <em>without</em> ERA5 at inference. The generative prior encodes atmospheric structure more richly
+          than $\mathbf{B} + \bar{\mathbf{x}}_b$.
+        </p>
+      </li>
+      <li>
+        <h3>Flow Matching $\approx$ Diffusion via complementary tradeoffs.</h3>
+        <p>
+          Both are instances of the same guidance template
+          $\nabla\log p(\mathbf{x}\mid\mathbf{y}) \approx \nabla\log p(\mathbf{x}) + \nabla\log p(\mathbf{y}\mid\mathbf{x})$
+          with different network parameterizations. Flow matching integrates accurately but has a weaker,
+          indirectly&#8209;derived score; diffusion has a strong Langevin corrector but a less accurate predictor. Each
+          framework compensates for its weaker component through its stronger one, leaving them at empirical parity.
+        </p>
+      </li>
+      <li>
+        <h3>The Langevin corrector is thermodynamic&#8209;specific.</h3>
+        <p>
+          Removing it costs $-9.7$ to $-10.6$ pp on $T_{2\mathrm{m}}/D_{2\mathrm{m}}$ (dense) and $-16.6$ to $-20.7$ pp under
+          sparsity, but barely touches wind. A $\sim\!2.4\times$ normalized&#8209;space residual imbalance explains why
+          off&#8209;manifold drift disproportionately hurts thermodynamic variables.
+        </p>
+      </li>
+      <li>
+        <h3>Variable&#8209;mixing in the latent autoencoder is unnecessary.</h3>
+        <p>
+          A spatial&#8209;mixing&#8209;only autoencoder matches a variable+spatial mixer on both reconstruction and
+          assimilation, with <strong>4&thinsp;&times; fewer AE parameters</strong>.
+        </p>
+      </li>
+      <li>
+        <h3>Latent DA: memory and speed win.</h3>
+        <p>
+          Under sparsity, latent Flow Guidance matches pixel Flow Guidance at
+          <strong>$\sim 40\%$ lower memory</strong> and <strong>$\sim 19\%$ lower wall&#8209;clock time</strong>.
+        </p>
+      </li>
+      <li>
+        <h3>Generative corrections propagate farther.</h3>
+        <p>
+          At the median 5&#8209;NN station distance (<strong>48&thinsp;km</strong>), Flow Guidance and Diffusion&#8209;SDA achieve
+          $\sim 28\%$ RMSE reduction vs. $\sim 22\%$ for 3D&#8209;Var.
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- =========================== METHOD =========================== -->
+<section class="section">
+  <div class="container">
+    <h2>Method</h2>
+    <div class="container narrow no-pad">
+      <p>
+        All guidance methods sample from the posterior
+        $p(\mathbf{x}\mid\mathbf{y}) \propto p(\mathbf{x})\,p(\mathbf{y}\mid\mathbf{x})$ by combining a pretrained
+        unconditional generator (flow or diffusion) with an observation&#8209;likelihood gradient along the sampling
+        trajectory. Methods differ in how they approximate the score of the prior and how the measurement term is
+        injected.
+      </p>
+    </div>
+
+    <figure>
+      <img src="assets/diff_fm_intro.png" alt="Flow matching vs. diffusion" width="1514" height="1614" loading="lazy" />
+      <figcaption>
+        <strong>Figure 1.</strong> Flow matching learns a deterministic velocity field; diffusion learns a score and
+        denoises via the reverse SDE. Both define a path from noise to data; guidance steers that path with
+        $\nabla\log p(\mathbf{y}\mid\mathbf{x})$.
+      </figcaption>
+    </figure>
+
+    <figure>
+      <img src="assets/method_fig_all.png" alt="Unified schematic of Flow Guidance, D&#8209;Flow, FlowDPS, Diffusion&#8209;SDA, and 3D&#8209;Var showing their sampling trajectories and where the observation term is injected" width="3359" height="2870" loading="lazy" />
+      <figcaption>
+        <strong>Figure 2.</strong> Unified view of the five generative methods plus 3D&#8209;Var. Flow Guidance and
+        Diffusion&#8209;SDA share the same guidance template; D&#8209;Flow replaces inner guidance with an outer
+        noise&#8209;optimization loop; stop&#8209;gradient drops the Jacobian of the network.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- =========================== BENCHMARK =========================== -->
+<section class="section alt">
+  <div class="container narrow">
+    <h2>Benchmark</h2>
+    <table class="spec">
+      <tr><th>Data</th><td>ERA5 (0.25°), surface variables $u_{10}$, $v_{10}$, $T_{2\mathrm{m}}$, $D_{2\mathrm{m}}$.</td></tr>
+      <tr><th>Observations</th><td>11,849 MADIS ground stations (CONUS), real noisy measurements.</td></tr>
+      <tr><th>Splits</th><td>Station-level train / val / test; 1,778 held-out test stations.</td></tr>
+      <tr><th>Evaluation</th><td>360 snapshots from 2023 — dense &amp; sparse protocols.</td></tr>
+      <tr><th>Metric</th><td>RMSE reduction over the ERA5 background, averaged across variables.</td></tr>
+    </table>
+    <figure>
+      <img src="assets/dataset.png" alt="MADIS station coverage across CONUS for dense (11,849) and sparse (1,000) benchmarks with train/val/test splits" width="3750" height="5201" loading="lazy" />
+      <figcaption><strong>Figure 3.</strong> MADIS station coverage across CONUS.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- =========================== RESULTS =========================== -->
+<section class="section">
+  <div class="container">
+    <h2>Results</h2>
+
+    <h3>Distance Decay</h3>
+    <p class="sub">How far do corrections propagate from observation locations?</p>
+    <div class="fig-grid-2">
+      <figure>
+        <img src="assets/improvement_vs_distance_comparison.png" alt="Dense benchmark: RMSE improvement over ERA5 as a function of distance to the nearest observation, all methods" width="3006" height="2317" loading="lazy" />
+        <figcaption><strong>Dense benchmark.</strong> Generative corrections stay positive out to ${\sim}120$&thinsp;km, well beyond the median 5-NN distance.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/improvement_vs_distance_comparison_sparse.png" alt="Sparse benchmark: RMSE improvement over ERA5 as a function of distance to the nearest observation, all methods" width="3043" height="2317" loading="lazy" />
+        <figcaption><strong>Sparse benchmark.</strong> The gap widens; D&#8209;Flow and stop-gradient collapse.</figcaption>
+      </figure>
+    </div>
+
+    <h3>Latent DA Pareto</h3>
+    <figure class="narrow-fig">
+      <img src="assets/latent_pareto.png" alt="Accuracy vs. compute Pareto frontier comparing pixel and latent Flow Guidance across compression depths" width="2008" height="1336" loading="lazy" />
+      <figcaption>
+        Latent Flow Guidance matches pixel&#8209;space quality at ~40&thinsp;% lower memory and ~19&thinsp;% lower wall-clock.
+      </figcaption>
+    </figure>
+
+    <h3>Regional Case Studies</h3>
+    <div class="fig-grid-2">
+      <figure><img src="assets/florida_case_study.png" alt="Florida peninsula u10 case study: ERA5 background, observations, and assimilation outputs across methods" width="5985" height="3784" loading="lazy" /><figcaption><strong>Florida ($u_{10}$).</strong> Coastal winds over ungauged water: generative methods $\sim\!72\%$ RMSE reduction vs. $66\%$ for 3D&#8209;Var.</figcaption></figure>
+      <figure><img src="assets/great_lakes_case_study.png" alt="Great Lakes u10 case study: ERA5 background, observations, and assimilation outputs across methods" width="5993" height="3784" loading="lazy" /><figcaption><strong>Great Lakes ($u_{10}$).</strong> ERA5 overestimates wind by $\sim\!4.5$ m/s; generative methods $53\%$ RMSE reduction vs. $45\%$ for 3D&#8209;Var.</figcaption></figure>
+      <figure><img src="assets/la_basin_case_study.png" alt="LA basin t2m case study: ERA5 background, observations, and assimilation outputs across methods" width="6074" height="3173" loading="lazy" /><figcaption><strong>LA Basin ($T_{2\mathrm{m}}$).</strong> Dense stations, complex terrain: all methods converge at $\sim\!36\%$ RMSE reduction (parity regime).</figcaption></figure>
+      <figure><img src="assets/rocky_mountains_case_study.png" alt="Rocky Mountains t2m case study: ERA5 background, observations, and assimilation outputs across methods" width="5930" height="3784" loading="lazy" /><figcaption><strong>Rocky Mountains ($T_{2\mathrm{m}}$).</strong> Near-uniform $\sim\!6.5$ K cold bias; generative RMSE 3.3–3.5 K edges 3D&#8209;Var (4.0 K).</figcaption></figure>
+    </div>
+
+    <h3>Perturbation Analysis</h3>
+    <figure class="narrow-fig">
+      <img src="assets/perturbation_analysis.png" alt="Perturbation amplification vs. injection time for flow and diffusion scores under matched noise schedules" width="2038" height="1585" loading="lazy" />
+      <figcaption>
+        Perturbation amplification ($\log_{10}$ scale) vs. injection time $t$. Top: score-quality isolation (flow vs. diffusion score on the same flow ODE).
+        Bottom: noise-schedule isolation (flow ODE vs. VP&#8209;SDE with diffusion score). Left: guidance-direction perturbations; right: random-direction.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- =========================== BIBTEX =========================== -->
+<section class="section alt" id="bibtex">
+  <div class="container narrow">
+    <h2>BibTeX</h2>
+    <p class="sub">Cite the paper:</p>
+    <div class="bib-block">
+      <pre><code id="bibPaper">@article{huang2025benchmark,
+  title   = {Benchmarking Generative Models for Weather Data Assimilation
+             on Real Station Observations},
+  author  = {Huang, Ruizhe and Yang, Qidong and Giezendanner, Jonathan and Wang, Sherrie},
+  year    = {2025}
+}</code></pre>
+      <button class="copy-btn" data-target="bibPaper" type="button" aria-label="Copy paper BibTeX to clipboard">
+        <i class="far fa-copy" aria-hidden="true"></i> Copy
+      </button>
+    </div>
+
+    <p class="sub" style="margin-top: 32px;">Cite the thesis:</p>
+    <div class="bib-block">
+      <pre><code id="bibThesis">@mastersthesis{huang2025thesis,
+  title   = {Benchmarking Generative Models for Weather Data Assimilation
+             on Real Station Observations},
+  author  = {Huang, Ruizhe},
+  school  = {Massachusetts Institute of Technology},
+  year    = {2025},
+  type    = {{S.M.} thesis},
+  address = {Cambridge, MA, USA}
+}</code></pre>
+      <button class="copy-btn" data-target="bibThesis" type="button" aria-label="Copy thesis BibTeX to clipboard">
+        <i class="far fa-copy" aria-hidden="true"></i> Copy
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== FOOTER =========================== -->
+<footer>
+  <div class="container narrow">
+    <p>
+      Website template adapted from
+      <a href="https://nerfies.github.io/">Nerfies</a>. Source available on
+      <a href="#">GitHub</a>. Feel free to reuse.
+    </p>
+    <p class="muted">&copy; 2025 Ruizhe Huang, Qidong Yang, Jonathan Giezendanner, Sherrie Wang &middot; MIT</p>
+  </div>
+</footer>
+
+<script>
+  // Copy BibTeX (per-block)
+  document.querySelectorAll('.copy-btn[data-target]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const target = document.getElementById(btn.dataset.target);
+      if (!target) return;
+      try {
+        await navigator.clipboard.writeText(target.innerText);
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+        setTimeout(() => btn.innerHTML = orig, 1500);
+      } catch {}
+    });
+  });
+</script>
+</body>
+</html>

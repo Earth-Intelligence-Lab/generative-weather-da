@@ -1,0 +1,23 @@
+# Thesis PDF — hosted externally (arXiv/Zenodo) to keep repo light
+MIT-Thesis.pdf
+
+# Local video transcode — using YouTube embed instead
+*.mp4
+
+# macOS junk
+.DS_Store
+._*
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS / system
+Thumbs.db
+
+# Jekyll (if ever used)
+_site/
+.jekyll-cache/
+.jekyll-metadata
